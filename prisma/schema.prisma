@@ -48,18 +48,17 @@ model rank {
 }
 
 model scoreboard {
-  score_id             Int   @id @default(autoincrement())
+  score_id             Int       @id @default(autoincrement())
   score_game_id        Int
   score_gamer_id       Int
   score_quantity_games Int
-  score_wins           Int
-  score_loses          Int
   score_tips           Int?
   score_attempts       Int?
   score_words          Int?
   score_points         Int?
-  game                 game  @relation(fields: [score_game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_scoreboard_game")
-  gamer                gamer @relation(fields: [score_gamer_id], references: [gamer_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_scoreboard_gamer")
+  score_data           DateTime? @db.Date
+  game                 game      @relation(fields: [score_game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_scoreboard_game")
+  gamer                gamer     @relation(fields: [score_gamer_id], references: [gamer_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_scoreboard_gamer")
 
   @@index([score_game_id], map: "FK_scoreboard_game")
   @@index([score_gamer_id], map: "FK_scoreboard_gamer")
