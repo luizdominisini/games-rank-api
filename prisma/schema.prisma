@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -11,29 +10,31 @@ datasource db {
 model game {
   game_id    Int          @id @default(autoincrement())
   game_name  String       @db.VarChar(10)
-  game_rules game_rules[]
+  game_rules game_rules?
   rank       rank[]
   scoreboard scoreboard[]
 }
 
 model game_rules {
-  rule_id             Int     @id @default(autoincrement())
-  rule_game_id        Int
-  base_point          Int?    @db.TinyInt
-  point_per_word      Int?    @db.TinyInt
-  penalty_per_tip     Int?    @db.TinyInt
-  penalty_per_attempt Int?    @db.TinyInt
-  max_attempts        String? @db.VarChar(255)
-  game                game    @relation(fields: [rule_game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_games_rules_games")
-
-  @@index([rule_game_id], map: "FK_games_rules_games")
+  rule_id             Int  @id @default(autoincrement())
+  rule_game_id        Int  @unique(map: "UK_game_rules_id")
+  base_point          Int? @db.TinyInt
+  point_per_word      Int? @db.TinyInt
+  penalty_per_tip     Int? @db.TinyInt
+  penalty_per_attempt Int? @db.TinyInt
+  max_attempts        Int? @db.TinyInt
+  game                game @relation(fields: [rule_game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_games_rules_games")
 }
 
 model gamer {
-  gamer_id   Int          @id @default(autoincrement())
-  gamer_name String       @db.VarChar(55)
-  rank       rank[]
-  scoreboard scoreboard[]
+  gamer_id           Int          @id @default(autoincrement())
+  gamer_name         String       @db.VarChar(55)
+  gamer_password     String       @db.VarChar(65)
+  gamer_username     String       @unique(map: "UK_gamer_username") @db.VarChar(20)
+  created_at         DateTime     @default(now()) @db.DateTime(0)
+  gamer_exclude_data DateTime?    @db.Date
+  rank               rank[]
+  scoreboard         scoreboard[]
 }
 
 model rank {
@@ -48,17 +49,16 @@ model rank {
 }
 
 model scoreboard {
-  score_id             Int       @id @default(autoincrement())
-  score_game_id        Int
-  score_gamer_id       Int
-  score_quantity_games Int
-  score_tips           Int?
-  score_attempts       Int?
-  score_words          Int?
-  score_points         Int?
-  score_data           DateTime? @db.Date
-  game                 game      @relation(fields: [score_game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_scoreboard_game")
-  gamer                gamer     @relation(fields: [score_gamer_id], references: [gamer_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_scoreboard_gamer")
+  score_id       Int     @id @default(autoincrement())
+  score_game_id  Int
+  score_gamer_id Int
+  score_tips     Int?
+  score_attempts Int?
+  score_words    Int?
+  score_points   Int?
+  score_data     String? @db.VarChar(12)
+  game           game    @relation(fields: [score_game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_scoreboard_game")
+  gamer          gamer   @relation(fields: [score_gamer_id], references: [gamer_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_scoreboard_gamer")
 
   @@index([score_game_id], map: "FK_scoreboard_game")
   @@index([score_gamer_id], map: "FK_scoreboard_gamer")
