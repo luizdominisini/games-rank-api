@@ -38,11 +38,13 @@ model gamer {
 }
 
 model rank {
-  rank_id       Int    @id @default(autoincrement())
-  rank_gamer_id Int?
-  rank_game_id  Int?
-  game          game?  @relation(fields: [rank_game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_rank_game")
-  gamer         gamer? @relation(fields: [rank_gamer_id], references: [gamer_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_rank_gamer")
+  rank_id           Int   @id @default(autoincrement())
+  rank_game_id      Int?
+  rank_total_points Int
+  rank_position     Int?  @db.TinyInt
+  rank_gamer_id     Int
+  game              game? @relation(fields: [rank_game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_rank_game")
+  gamer             gamer @relation(fields: [rank_gamer_id], references: [gamer_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_rank_gamer")
 
   @@index([rank_game_id], map: "FK_rank_game")
   @@index([rank_gamer_id], map: "FK_rank_gamer")

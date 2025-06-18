@@ -24,7 +24,7 @@ export class ScoreboardService {
     try {
       const gameOfDayExist = await this.prismaService.$queryRaw<
         any[]
-      >` SELECT * FROM scoreboard WHERE score_data = ${today} AND score_game_id = ${gamesEnum.CONEXO}`;
+      >` SELECT * FROM scoreboard WHERE score_data = ${today} AND score_game_id = ${gamesEnum.TERMO} AND score_gamer_id = ${req.user.gamer_id}`;
 
       if (gameOfDayExist.length > 0) {
         throw new ForbiddenException('You have played this game today.');
@@ -46,6 +46,44 @@ export class ScoreboardService {
         },
       });
 
+      const rank = await this.prismaService.rank.findFirst({
+        where: {
+          rank_gamer_id: req.user.gamer_id,
+          rank_game_id: gamesEnum.TERMO,
+        },
+      });
+
+      if (!rank) {
+        await this.prismaService.rank.create({
+          data: {
+            rank_total_points: points,
+            rank_game_id: gamesEnum.TERMO,
+            rank_gamer_id: req.user.gamer_id,
+          },
+        });
+      } else {
+        await this.prismaService.rank.update({
+          where: { rank_id: rank.rank_id },
+          data: {
+            rank_total_points: rank.rank_total_points + points,
+          },
+        });
+      }
+
+      const ranks = await this.prismaService.rank.findMany({
+        where: { rank_game_id: gamesEnum.TERMO },
+        orderBy: { rank_total_points: 'desc' },
+      });
+
+      for (let i = 0; i < ranks.length; i++) {
+        await this.prismaService.rank.update({
+          where: { rank_id: ranks[i].rank_id },
+          data: {
+            rank_position: i + 1,
+          },
+        });
+      }
+
       return { sucess: true };
     } catch (error) {
       throw new BadRequestException(`createScoreboardTermo: ${error.message}`);
@@ -61,7 +99,7 @@ export class ScoreboardService {
     try {
       const gameOfDayExist = await this.prismaService.$queryRaw<
         any[]
-      >` SELECT * FROM scoreboard WHERE score_data = ${today} AND score_game_id = ${gamesEnum.CONEXO}`;
+      >` SELECT * FROM scoreboard WHERE score_data = ${today} AND score_game_id = ${gamesEnum.CONEXO} AND score_gamer_id = ${req.user.gamer_id}`;
 
       if (gameOfDayExist.length > 0) {
         throw new ForbiddenException('You have played this game today.');
@@ -88,9 +126,47 @@ export class ScoreboardService {
         },
       });
 
+      const rank = await this.prismaService.rank.findFirst({
+        where: {
+          rank_gamer_id: req.user.gamer_id,
+          rank_game_id: gamesEnum.CONEXO,
+        },
+      });
+
+      if (!rank) {
+        await this.prismaService.rank.create({
+          data: {
+            rank_total_points: points,
+            rank_game_id: gamesEnum.CONEXO,
+            rank_gamer_id: req.user.gamer_id,
+          },
+        });
+      } else {
+        await this.prismaService.rank.update({
+          where: { rank_id: rank.rank_id },
+          data: {
+            rank_total_points: rank.rank_total_points + points,
+          },
+        });
+      }
+
+      const ranks = await this.prismaService.rank.findMany({
+        where: { rank_game_id: gamesEnum.CONEXO },
+        orderBy: { rank_total_points: 'desc' },
+      });
+
+      for (let i = 0; i < ranks.length; i++) {
+        await this.prismaService.rank.update({
+          where: { rank_id: ranks[i].rank_id },
+          data: {
+            rank_position: i + 1,
+          },
+        });
+      }
+
       return { sucess: true };
     } catch (error) {
-      throw new BadRequestException(`createScoreboardTermo: ${error.message}`);
+      throw new BadRequestException(`createScoreboardConexo: ${error.message}`);
     }
   }
 
@@ -102,7 +178,7 @@ export class ScoreboardService {
     try {
       const gameOfDayExist = await this.prismaService.$queryRaw<
         any[]
-      >` SELECT * FROM scoreboard WHERE score_data = ${today} AND score_game_id = ${gamesEnum.LETROSO}`;
+      >` SELECT * FROM scoreboard WHERE score_data = ${today} AND score_game_id = ${gamesEnum.LETROSO} AND score_gamer_id = ${req.user.gamer_id}`;
 
       if (gameOfDayExist.length > 0) {
         throw new ForbiddenException('You have played this game today.');
@@ -124,9 +200,124 @@ export class ScoreboardService {
         },
       });
 
+      const rank = await this.prismaService.rank.findFirst({
+        where: {
+          rank_gamer_id: req.user.gamer_id,
+          rank_game_id: gamesEnum.LETROSO,
+        },
+      });
+
+      if (!rank) {
+        await this.prismaService.rank.create({
+          data: {
+            rank_total_points: points,
+            rank_game_id: gamesEnum.LETROSO,
+            rank_gamer_id: req.user.gamer_id,
+          },
+        });
+      } else {
+        await this.prismaService.rank.update({
+          where: { rank_id: rank.rank_id },
+          data: {
+            rank_total_points: rank.rank_total_points + points,
+          },
+        });
+      }
+
+      const ranks = await this.prismaService.rank.findMany({
+        where: { rank_game_id: gamesEnum.LETROSO },
+        orderBy: { rank_total_points: 'desc' },
+      });
+
+      for (let i = 0; i < ranks.length; i++) {
+        await this.prismaService.rank.update({
+          where: { rank_id: ranks[i].rank_id },
+          data: {
+            rank_position: i + 1,
+          },
+        });
+      }
+
       return { sucess: true };
     } catch (error) {
-      throw new BadRequestException(`createScoreboardTermo: ${error.message}`);
+      throw new BadRequestException(
+        `createScoreboardLetroso: ${error.message}`,
+      );
+    }
+  }
+
+  async rankTermo() {
+    try {
+      return this.prismaService.rank.findMany({
+        where: { rank_game_id: gamesEnum.TERMO },
+        include: {
+          game: {
+            select: {
+              game_name: true,
+            },
+          },
+          gamer: {
+            select: {
+              gamer_name: true,
+            },
+          },
+        },
+        orderBy: {
+          rank_position: 'asc',
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(`rankTermo: ${error.message}`);
+    }
+  }
+
+  async rankLetroso() {
+    try {
+      return this.prismaService.rank.findMany({
+        where: { rank_game_id: gamesEnum.LETROSO },
+        include: {
+          game: {
+            select: {
+              game_name: true,
+            },
+          },
+          gamer: {
+            select: {
+              gamer_name: true,
+            },
+          },
+        },
+        orderBy: {
+          rank_position: 'asc',
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(`rankTermo: ${error.message}`);
+    }
+  }
+
+  async rankConexo() {
+    try {
+      return this.prismaService.rank.findMany({
+        where: { rank_game_id: gamesEnum.CONEXO },
+        include: {
+          game: {
+            select: {
+              game_name: true,
+            },
+          },
+          gamer: {
+            select: {
+              gamer_name: true,
+            },
+          },
+        },
+        orderBy: {
+          rank_position: 'asc',
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(`rankTermo: ${error.message}`);
     }
   }
 }

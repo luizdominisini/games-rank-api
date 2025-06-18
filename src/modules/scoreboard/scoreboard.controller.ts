@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { CreateScoreboardConexoDto } from './dto/create-scoreboardConexo.dto';
@@ -33,5 +33,20 @@ export class ScoreboardController {
     @Req() req: Request,
   ) {
     return this.scoreboardService.createScoreboardLetroso(data, req);
+  }
+
+  @Get('rank/termo')
+  rankTermo() {
+    return this.scoreboardService.rankTermo();
+  }
+
+  @Get('rank/letroso')
+  rankLetroso() {
+    return this.scoreboardService.rankLetroso();
+  }
+
+  @Get('rank/conexo')
+  rankConexo() {
+    return this.scoreboardService.rankConexo();
   }
 }
