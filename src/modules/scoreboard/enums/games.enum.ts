@@ -3,3 +3,9 @@ export enum gamesEnum {
   LETROSO = 2,
   CONEXO = 3,
 }
+
+export enum gameModeEnum {
+  TERMO = 'termo',
+  DUETO = 'dueto',
+  QUARTETO = 'quarteto',
+}

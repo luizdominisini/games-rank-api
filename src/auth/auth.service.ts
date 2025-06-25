@@ -21,8 +21,6 @@ export class AuthService {
     data.username = data.username.trim();
     data.password = data.password.trim();
 
-    console.log(data);
-
     const gamer = await this.prismaService.gamer.findUnique({
       where: { gamer_username: data.username },
     });

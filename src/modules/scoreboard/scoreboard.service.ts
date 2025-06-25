@@ -16,33 +16,47 @@ export class ScoreboardService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async createScoreboardTermo(
-    { words }: CreateScoreboardTermoDto,
+    { attempts, gameMode }: CreateScoreboardTermoDto,
     req: Request,
   ) {
+    let points: number;
     const today = DateTime.now().toISODate();
 
     try {
       const gameOfDayExist = await this.prismaService.$queryRaw<
         any[]
-      >` SELECT * FROM scoreboard WHERE score_data = ${today} AND score_game_id = ${gamesEnum.TERMO} AND score_gamer_id = ${req.user.gamer_id}`;
+      >` SELECT * FROM scoreboard WHERE score_data = ${today} AND score_game_id = ${gamesEnum.TERMO} AND score_gamer_id = ${req.user.gamer_id} AND score_game_mode = ${gameMode}`;
 
       if (gameOfDayExist.length > 0) {
         throw new ForbiddenException('You have played this game today.');
       }
 
       const rules = await this.prismaService.game_rules.findUnique({
-        where: { rule_game_id: gamesEnum.TERMO },
+        where: { rule_game_id: gamesEnum.TERMO, game_mode: gameMode },
       });
 
-      const points = words * rules.point_per_word;
+      if (attempts < rules.min_attempts || attempts > rules.max_attempts) {
+        throw new BadRequestException(
+          `The minimum number of attempts of ${rules.game_mode} is ${rules.min_attempts} and the maximum is ${rules.max_attempts}`,
+        );
+      }
+
+      points = this.calculatePoints(
+        attempts,
+        rules.base_point,
+        rules.min_attempts,
+        rules.penalty_per_attempt,
+        rules.max_attempts,
+      );
 
       await this.prismaService.scoreboard.create({
         data: {
-          score_words: words,
+          score_attempts: attempts,
           score_points: points,
           score_gamer_id: req.user.gamer_id,
           score_game_id: gamesEnum.TERMO,
           score_data: today,
+          score_game_mode: gameMode,
         },
       });
 
@@ -105,9 +119,15 @@ export class ScoreboardService {
         throw new ForbiddenException('You have played this game today.');
       }
 
-      const rules = await this.prismaService.game_rules.findUnique({
+      const rules = await this.prismaService.game_rules.findFirst({
         where: { rule_game_id: gamesEnum.CONEXO },
       });
+
+      if (attempts < rules.min_attempts) {
+        throw new BadRequestException(
+          `The minimum number of attempts of ${rules.game_mode} is ${rules.min_attempts}`,
+        );
+      }
 
       points = rules.base_point - tips * rules.penalty_per_tip;
 
@@ -184,9 +204,15 @@ export class ScoreboardService {
         throw new ForbiddenException('You have played this game today.');
       }
 
-      const rules = await this.prismaService.game_rules.findUnique({
+      const rules = await this.prismaService.game_rules.findFirst({
         where: { rule_game_id: gamesEnum.LETROSO },
       });
+
+      if (attempts < rules.min_attempts) {
+        throw new BadRequestException(
+          `The minimum number of attempts of ${rules.game_mode} is ${rules.min_attempts}`,
+        );
+      }
 
       const points = rules.base_point - attempts * rules.penalty_per_attempt;
 
@@ -319,5 +345,20 @@ export class ScoreboardService {
     } catch (error) {
       throw new BadRequestException(`rankTermo: ${error.message}`);
     }
+  }
+
+  private calculatePoints(
+    attempts: number,
+    basePoints: number,
+    minAttempts: number,
+    penaltyPerAttempt: number,
+    maxAttempts?: number,
+  ) {
+    if (attempts >= maxAttempts) {
+      return 0;
+    }
+
+    const penalty = (attempts - minAttempts) * penaltyPerAttempt;
+    return Math.max(0, basePoints - penalty);
   }
 }
