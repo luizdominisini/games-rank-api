@@ -347,6 +347,41 @@ export class ScoreboardService {
     }
   }
 
+  async rankGeral() {
+    try {
+      const groupedRanks = await this.prismaService.rank.groupBy({
+        by: ['rank_gamer_id'],
+        _sum: {
+          rank_total_points: true,
+        },
+        orderBy: {
+          _sum: {
+            rank_total_points: 'desc',
+          },
+        },
+      });
+
+      const result = await Promise.all(
+        groupedRanks.map(async (rank) => {
+          const gamer = await this.prismaService.gamer.findUnique({
+            where: { gamer_id: rank.rank_gamer_id },
+            select: { gamer_name: true },
+          });
+
+          return {
+            gamer_id: rank.rank_gamer_id,
+            gamer_name: gamer?.gamer_name ?? 'Desconhecido',
+            total_points: rank._sum.rank_total_points,
+          };
+        }),
+      );
+
+      return result;
+    } catch (error) {
+      throw new BadRequestException(`rankGeral: ${error.message}`);
+    }
+  }
+
   private calculatePoints(
     attempts: number,
     basePoints: number,

@@ -49,4 +49,9 @@ export class ScoreboardController {
   rankConexo() {
     return this.scoreboardService.rankConexo();
   }
+
+  @Get('rank/geral')
+  rankGeral() {
+    return this.scoreboardService.rankGeral();
+  }
 }
