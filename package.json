@@ -8,7 +8,7 @@
   "scripts": {
     "build": "npx prisma generate && tsc",
     "vercel-build": "tsc",
-    "start": "node dist/api/vercel.js",
+    "start": "node dist/main.js",
     "dev": "ts-node-dev --respawn src/main.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start:dev": "nest start --watch",
