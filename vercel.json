@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "functions": {
+    "api/vercel.ts": {
+      "runtime": "vercel-node@canary"
+    }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/vercel.ts"
+    }
+  ]
+}
