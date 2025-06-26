@@ -5,7 +5,7 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import { Context, Handler } from 'aws-lambda';
 import { createServer, proxy } from 'aws-serverless-express';
 import * as express from 'express';
-import { AppModule } from './app.module';
+import { AppModule } from '../src/app.module';
 
 let cachedServer: any = null;
 
