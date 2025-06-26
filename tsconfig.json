@@ -16,10 +16,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "strict": true
+    "noFallthroughCasesInSwitch": false
   },
   "include": ["src", "api"]
 }
