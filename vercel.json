@@ -1,14 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "api/vercel.ts": {
+    "api/vercel.js": {
       "runtime": "nodejs18.x"
     }
   },
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/vercel.ts"
+      "dest": "api/vercel.js"
     }
   ]
 }
