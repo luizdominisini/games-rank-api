@@ -129,6 +129,10 @@ export class ScoreboardService {
         );
       }
 
+      if (!tips) {
+        tips = 0;
+      }
+
       points = rules.base_point - tips * rules.penalty_per_tip;
 
       if (attempts > rules.max_attempts) {
